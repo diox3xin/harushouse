@@ -495,20 +495,40 @@ function renderExtensionUI() {
 
     console.log(LOG_PREFIX, "UI элемент #rl-root найден в DOM ✓");
 
-    // Ручная привязка inline-drawer toggle
-    // (на случай если ST не перехватывает динамически добавленные drawer-ы)
-    $("#rl-drawer-toggle").on("click", function () {
-        const $content = $("#rl-drawer-content");
-        const $icon = $(this).find(".inline-drawer-icon");
+    // Drawer toggle — с защитой от конфликта с ST
+    // Останавливаем всплытие, чтобы встроенный обработчик ST
+    // не перехватывал клик и не дёргал drawer повторно.
+    const drawerToggle = document.getElementById("rl-drawer-toggle");
+    const drawerContent = document.getElementById("rl-drawer-content");
 
-        if ($content.is(":visible")) {
-            $content.slideUp(200);
-            $icon.removeClass("up").addClass("down");
-        } else {
-            $content.slideDown(200);
-            $icon.removeClass("down").addClass("up");
-        }
-    });
+    if (drawerToggle && drawerContent) {
+        // Убираем класс, который ST использует для автопривязки,
+        // чтобы ST вообще не трогал наш drawer.
+        drawerToggle.classList.remove("inline-drawer-toggle");
+
+        // Начинаем со свёрнутого состояния
+        drawerContent.style.display = "none";
+
+        drawerToggle.addEventListener("click", function (e) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const $content = $(drawerContent);
+            const $icon = $(this).find(".inline-drawer-icon");
+
+            if ($content.is(":visible")) {
+                $content.slideUp(200);
+                $icon.removeClass("up").addClass("down");
+            } else {
+                $content.slideDown(200);
+                $icon.removeClass("down").addClass("up");
+            }
+        });
+
+        console.log(LOG_PREFIX, "Drawer toggle привязан вручную (ST-класс удалён) ✓");
+    } else {
+        console.warn(LOG_PREFIX, "Drawer toggle элементы не найдены!");
+    }
 
     renderCardsList();
     bindUIEvents();
