@@ -1,0 +1,12 @@
+{
+    "display_name": "Residence Loader",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "harubunny",
+    "version": "1.0.0",
+    "homePage": "https://github.com/diox3xin/harushouse/",
+    "auto_update": false
+}
