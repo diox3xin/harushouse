@@ -1,207 +1,348 @@
-/*
- * ============================================================
- *  Residence Loader — стили (Purple Edition)
- * ============================================================
- *  Фиолетовая цветовая схема с плавными градиентами,
- *  свечением и мягкими тенями.
- * ============================================================
- */
+/* ═══════════════════════════════════════
+ *  Residence Loader — Premium UI Theme
+ *  Glassmorphism + Subtle Glow
+ *  Стиль унифицирован с ChronoContext
+ * ═══════════════════════════════════════ */
 
-/* ===== CSS-переменные расширения ===== */
+/* ─── CSS-переменные расширения ─── */
 
 #rl-root {
-    --rl-purple-deep: #2d1b4e;
-    --rl-purple-mid: #4a2d7a;
-    --rl-purple-bright: #7c4dff;
-    --rl-purple-light: #b388ff;
-    --rl-purple-glow: rgba(124, 77, 255, 0.25);
-    --rl-purple-subtle: rgba(179, 136, 255, 0.08);
-    --rl-purple-border: rgba(124, 77, 255, 0.3);
-    --rl-purple-border-hover: rgba(124, 77, 255, 0.55);
-    --rl-text-primary: #e8e0f0;
-    --rl-text-secondary: #a893c2;
-    --rl-text-dim: #7b6a94;
-    --rl-danger: #ff5c8a;
-    --rl-success: #69f0ae;
-    --rl-card-bg: rgba(45, 27, 78, 0.45);
-    --rl-card-bg-hover: rgba(74, 45, 122, 0.5);
-    --rl-input-bg: rgba(20, 12, 35, 0.6);
-    --rl-transition-fast: 0.15s ease;
-    --rl-transition-med: 0.25s ease;
-    --rl-radius: 8px;
-    --rl-radius-sm: 5px;
+    --rl-accent: #9b7dd4;
+    --rl-accent-dim: rgba(155, 125, 212, 0.25);
+    --rl-accent-glow: rgba(155, 125, 212, 0.4);
+    --rl-danger: #e05555;
+    --rl-danger-dim: rgba(224, 85, 85, 0.15);
+    --rl-success: #5dba7d;
+    --rl-success-dim: rgba(93, 186, 125, 0.15);
+    --rl-surface: rgba(255, 255, 255, 0.03);
+    --rl-surface-hover: rgba(255, 255, 255, 0.06);
+    --rl-border: rgba(255, 255, 255, 0.07);
+    --rl-border-accent: rgba(155, 125, 212, 0.3);
+    --rl-text: var(--SmartThemeBodyColor, #d4d4d4);
+    --rl-text-dim: rgba(200, 200, 200, 0.55);
+    --rl-radius: 10px;
+    --rl-radius-sm: 6px;
+    --rl-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95em;
 }
 
-/* ===== Контейнер ===== */
-
-.rl-container {
-    font-size: 14px;
-    line-height: 1.45;
+/* Плавное появление расширения */
+#rl-root {
+    animation: rl-fadein 0.4s ease;
 }
 
-/* ===== Drawer header ===== */
+@keyframes rl-fadein {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-#rl-root .inline-drawer-header {
-    background: linear-gradient(135deg, var(--rl-purple-deep) 0%, var(--rl-purple-mid) 100%);
-    border: 1px solid var(--rl-purple-border);
+/* ─── Контейнер drawer ─── */
+
+#rl-root .inline-drawer {
+    border: 1px solid var(--rl-border);
     border-radius: var(--rl-radius);
-    padding: 10px 14px;
-    transition: border-color var(--rl-transition-med), box-shadow var(--rl-transition-med);
-    position: relative;
+    background: var(--rl-surface);
+    backdrop-filter: blur(12px);
     overflow: hidden;
+    transition: border-color var(--rl-transition);
 }
 
-#rl-root .inline-drawer-header::before {
+#rl-root .inline-drawer:hover {
+    border-color: var(--rl-border-accent);
+}
+
+/* ─── Акцентная полоска сверху drawer ─── */
+
+#rl-root .inline-drawer::before {
     content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(179, 136, 255, 0.07), transparent);
-    transition: left 0.6s ease;
-    pointer-events: none;
+    display: block;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--rl-accent) 30%,
+        #c9a0dc 50%,
+        var(--rl-accent) 70%,
+        transparent 100%
+    );
+    opacity: 0.6;
 }
 
-#rl-root .inline-drawer-header:hover::before {
-    left: 100%;
+/* ─── Заголовок drawer ─── */
+
+#rl-root .inline-drawer-toggle {
+    padding: 12px 14px;
+    background: linear-gradient(
+        135deg,
+        rgba(155, 125, 212, 0.08) 0%,
+        rgba(100, 80, 160, 0.04) 50%,
+        rgba(155, 125, 212, 0.06) 100%
+    );
+    border-bottom: 1px solid var(--rl-border);
+    transition: background var(--rl-transition);
+    user-select: none;
 }
 
-#rl-root .inline-drawer-header:hover {
-    border-color: var(--rl-purple-border-hover);
-    box-shadow: 0 0 12px var(--rl-purple-glow);
+#rl-root .inline-drawer-toggle:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(155, 125, 212, 0.14) 0%,
+        rgba(100, 80, 160, 0.08) 50%,
+        rgba(155, 125, 212, 0.10) 100%
+    );
 }
 
-#rl-root .inline-drawer-header b {
-    color: var(--rl-purple-light);
-    font-size: 14.5px;
-    letter-spacing: 0.3px;
+#rl-root .inline-drawer-toggle b {
+    font-size: 1.02em;
+    letter-spacing: 0.04em;
+    background: linear-gradient(90deg, var(--rl-accent), #c9a0dc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 #rl-root .inline-drawer-icon {
-    color: var(--rl-purple-light);
-    transition: transform 0.3s ease, color var(--rl-transition-fast);
+    color: var(--rl-accent);
+    opacity: 0.7;
+    transition: transform 0.3s ease, opacity var(--rl-transition);
 }
 
-#rl-root .inline-drawer-icon.up {
-    transform: rotate(180deg);
+#rl-root .inline-drawer-toggle:hover .inline-drawer-icon {
+    opacity: 1;
 }
 
-/* ===== Drawer content ===== */
+/* ─── Контент drawer ─── */
 
 #rl-root .inline-drawer-content {
-    border: 1px solid var(--rl-purple-border);
-    border-top: none;
-    border-radius: 0 0 var(--rl-radius) var(--rl-radius);
-    background: linear-gradient(180deg, rgba(30, 18, 52, 0.85) 0%, rgba(20, 12, 35, 0.9) 100%);
-    padding: 12px 14px;
-    backdrop-filter: blur(8px);
+    padding: 12px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-/* ===== Секции и разделители ===== */
+/* ─── Бейдж активных карточек ─── */
+
+.rl-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    margin-left: 8px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--rl-success), #4a9e68);
+    color: #fff;
+    font-size: 0.72em;
+    font-weight: 700;
+    vertical-align: middle;
+    box-shadow: 0 0 8px rgba(93, 186, 125, 0.3);
+    animation: rl-badge-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes rl-badge-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(93, 186, 125, 0.3); }
+    50% { box-shadow: 0 0 14px rgba(93, 186, 125, 0.5); }
+}
+
+/* ─── Секции и строки ─── */
 
 .rl-section {
-    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
-
-#rl-root hr {
-    border: none;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--rl-purple-border), transparent);
-    margin: 10px 0;
-}
-
-/* ===== Строки настроек ===== */
 
 .rl-row {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    margin: 6px 0;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .rl-row > span {
+    font-size: 0.86em;
+    color: var(--rl-text-dim);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-weight: 600;
     white-space: nowrap;
-    font-size: 13px;
-    color: var(--rl-text-secondary);
 }
 
 .rl-hint {
     display: block;
     width: 100%;
     color: var(--rl-text-dim);
-    font-size: 11px;
+    font-size: 0.76em;
     font-style: italic;
     margin-top: 2px;
     line-height: 1.35;
+    letter-spacing: 0.01em;
 }
 
-/* ===== Инпуты и textarea ===== */
+/* ─── Горизонтальные разделители ─── */
 
-#rl-root .text_pole,
-#rl-root select.text_pole {
-    background: var(--rl-input-bg);
-    border: 1px solid var(--rl-purple-border);
-    border-radius: var(--rl-radius-sm);
-    color: var(--rl-text-primary);
-    transition: border-color var(--rl-transition-fast), box-shadow var(--rl-transition-fast);
-    padding: 4px 8px;
+#rl-root hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--rl-border-accent) 50%,
+        transparent 100%
+    );
+    margin: 6px 0;
 }
 
-#rl-root .text_pole:focus,
-#rl-root select.text_pole:focus {
-    border-color: var(--rl-purple-bright);
-    box-shadow: 0 0 6px var(--rl-purple-glow);
-    outline: none;
-}
-
-#rl-root textarea.text_pole {
-    resize: vertical;
-    min-height: 120px;
-    font-family: "Consolas", "Courier New", monospace;
-    font-size: 12.5px;
-    line-height: 1.5;
-}
-
-/* ===== Чекбоксы ===== */
+/* ─── Чекбоксы ─── */
 
 #rl-root .checkbox_label {
-    color: var(--rl-text-primary);
-    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
     cursor: pointer;
+    padding: 5px 8px;
+    border-radius: var(--rl-radius-sm);
+    border: 1px solid transparent;
+    transition: all var(--rl-transition);
+    font-size: 0.9em;
+}
+
+#rl-root .checkbox_label:hover {
+    background: var(--rl-surface-hover);
+    border-color: var(--rl-border);
+}
+
+#rl-root .checkbox_label:has(input:checked) {
+    background: var(--rl-accent-dim);
+    border-color: rgba(155, 125, 212, 0.2);
+}
+
+#rl-root .checkbox_label:has(input:checked):hover {
+    border-color: rgba(155, 125, 212, 0.35);
 }
 
 #rl-root .checkbox_label input[type="checkbox"] {
-    accent-color: var(--rl-purple-bright);
+    accent-color: var(--rl-accent);
+    flex-shrink: 0;
 }
 
-/* ===== Бейдж активных карточек ===== */
+/* Главный переключатель (enabled) — особый стиль */
 
-.rl-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 6px;
-    margin-left: 8px;
-    border-radius: 11px;
-    background: linear-gradient(135deg, var(--rl-purple-bright), #aa66ff);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    vertical-align: middle;
-    box-shadow: 0 0 8px var(--rl-purple-glow);
-    animation: rl-badge-pulse 2s ease-in-out infinite;
+#rl-root .rl-section:first-child .rl-row:first-child .checkbox_label {
+    padding: 8px 12px;
+    background: var(--rl-surface);
+    border: 1px solid var(--rl-border);
 }
 
-@keyframes rl-badge-pulse {
-    0%, 100% { box-shadow: 0 0 6px var(--rl-purple-glow); }
-    50% { box-shadow: 0 0 14px rgba(124, 77, 255, 0.45); }
+#rl-root .rl-section:first-child .rl-row:first-child .checkbox_label:hover {
+    background: var(--rl-surface-hover);
+    border-color: var(--rl-border-accent);
 }
 
-/* ===== Заголовок карточек + кнопки ===== */
+#rl-root .rl-section:first-child .rl-row:first-child .checkbox_label:has(input:checked) {
+    background: var(--rl-accent-dim);
+    border-color: var(--rl-accent);
+    box-shadow: 0 0 12px var(--rl-accent-glow);
+}
+
+#rl-root .rl-section:first-child .rl-row:first-child .checkbox_label span {
+    font-weight: 600;
+    font-size: 0.94em;
+    letter-spacing: 0.01em;
+}
+
+/* ─── Иконка состояния при включённом расширении ─── */
+
+#rl-enabled:checked ~ span::after {
+    content: " ●";
+    color: var(--rl-success);
+    font-size: 0.7em;
+    animation: rl-dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes rl-dot-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ─── Select ─── */
+
+#rl-root select.text_pole {
+    padding: 7px 10px;
+    border-radius: var(--rl-radius-sm);
+    border: 1px solid var(--rl-border);
+    background: var(--rl-surface);
+    color: var(--rl-text);
+    cursor: pointer;
+    transition: all var(--rl-transition);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239b7dd4' opacity='0.6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+}
+
+#rl-root select.text_pole:hover {
+    border-color: var(--rl-border-accent);
+}
+
+#rl-root select.text_pole:focus {
+    border-color: var(--rl-accent);
+    box-shadow: 0 0 0 2px var(--rl-accent-dim);
+    outline: none;
+}
+
+/* ─── Input number & text ─── */
+
+#rl-root input.text_pole {
+    padding: 7px 10px;
+    border-radius: var(--rl-radius-sm);
+    border: 1px solid var(--rl-border);
+    background: var(--rl-surface);
+    color: var(--rl-text);
+    transition: all var(--rl-transition);
+}
+
+#rl-root input.text_pole:hover {
+    border-color: var(--rl-border-accent);
+}
+
+#rl-root input.text_pole:focus {
+    border-color: var(--rl-accent);
+    box-shadow: 0 0 0 2px var(--rl-accent-dim);
+    outline: none;
+}
+
+/* ─── Textarea (wrapper, content) ─── */
+
+#rl-root textarea.text_pole {
+    padding: 10px 12px;
+    border-radius: var(--rl-radius-sm);
+    border: 1px solid var(--rl-border);
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--rl-text);
+    transition: all var(--rl-transition);
+    resize: vertical;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.82em;
+    line-height: 1.55;
+    tab-size: 4;
+}
+
+#rl-root textarea.text_pole:hover {
+    border-color: var(--rl-border-accent);
+}
+
+#rl-root textarea.text_pole:focus {
+    border-color: var(--rl-accent);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 0 0 2px var(--rl-accent-dim),
+        inset 0 0 20px rgba(155, 125, 212, 0.03);
+    outline: none;
+}
+
+/* ─── Заголовок карточек + кнопки ─── */
 
 .rl-cards-header {
     display: flex;
@@ -209,12 +350,13 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .rl-cards-header b {
-    color: var(--rl-purple-light);
-    font-size: 13.5px;
+    font-size: 0.94em;
+    letter-spacing: 0.02em;
+    color: var(--rl-text);
 }
 
 .rl-header-buttons {
@@ -222,37 +364,45 @@
     gap: 4px;
 }
 
-/* ===== Кнопки (menu_button) ===== */
-
-#rl-root .menu_button {
-    background: var(--rl-card-bg);
-    border: 1px solid var(--rl-purple-border);
+.rl-header-buttons .menu_button_icon {
+    font-size: 0.82em;
+    padding: 5px 10px;
     border-radius: var(--rl-radius-sm);
-    color: var(--rl-purple-light);
-    transition: all var(--rl-transition-fast);
+    border: 1px solid var(--rl-border);
+    background: var(--rl-surface);
+    color: var(--rl-text);
     cursor: pointer;
+    transition: all var(--rl-transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-#rl-root .menu_button:hover {
-    background: var(--rl-card-bg-hover);
-    border-color: var(--rl-purple-border-hover);
-    color: #fff;
-    box-shadow: 0 0 8px var(--rl-purple-glow);
+.rl-header-buttons .menu_button_icon:hover {
+    background: var(--rl-surface-hover);
+    border-color: var(--rl-border-accent);
 }
 
-#rl-root .menu_button:active {
-    transform: scale(0.96);
+#rl-add-card {
+    background: var(--rl-accent-dim) !important;
+    border-color: rgba(155, 125, 212, 0.2) !important;
 }
 
-/* ===== Список карточек ===== */
+#rl-add-card:hover {
+    background: rgba(155, 125, 212, 0.3) !important;
+    border-color: var(--rl-accent) !important;
+    box-shadow: 0 0 10px var(--rl-accent-glow);
+}
+
+/* ─── Список карточек ─── */
 
 .rl-cards-list {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    max-height: 420px;
+    gap: 4px;
+    max-height: 400px;
     overflow-y: auto;
-    padding-right: 3px;
+    padding-right: 2px;
 }
 
 .rl-empty {
@@ -260,10 +410,32 @@
     color: var(--rl-text-dim);
     font-style: italic;
     padding: 16px 0;
-    font-size: 13px;
+    font-size: 0.86em;
+    letter-spacing: 0.01em;
 }
 
-/* ===== Карточка ===== */
+/* ─── Скроллбар списка карточек ─── */
+
+.rl-cards-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.rl-cards-list::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.rl-cards-list::-webkit-scrollbar-thumb {
+    background: var(--rl-accent-dim);
+    border-radius: 3px;
+    transition: background 0.2s;
+}
+
+.rl-cards-list::-webkit-scrollbar-thumb:hover {
+    background: var(--rl-accent-glow);
+}
+
+/* ─── Отдельная карточка ─── */
 
 .rl-card {
     display: flex;
@@ -271,43 +443,24 @@
     justify-content: space-between;
     gap: 8px;
     padding: 8px 12px;
-    border-radius: var(--rl-radius);
-    background: var(--rl-card-bg);
-    border: 1px solid var(--rl-purple-border);
-    transition: all var(--rl-transition-med);
-    position: relative;
-    overflow: hidden;
-}
-
-.rl-card::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 3px;
-    height: 100%;
-    background: var(--rl-purple-bright);
-    border-radius: 3px 0 0 3px;
-    opacity: 0;
-    transition: opacity var(--rl-transition-fast);
+    border-radius: var(--rl-radius-sm);
+    background: var(--rl-surface);
+    border: 1px solid var(--rl-border);
+    transition: all var(--rl-transition);
 }
 
 .rl-card:hover {
-    background: var(--rl-card-bg-hover);
-    border-color: var(--rl-purple-border-hover);
-    box-shadow: 0 2px 10px rgba(124, 77, 255, 0.12);
-}
-
-.rl-card:hover::after {
-    opacity: 1;
+    background: var(--rl-surface-hover);
+    border-color: var(--rl-border-accent);
 }
 
 .rl-card-off {
     opacity: 0.4;
+    filter: grayscale(0.3);
 }
 
-.rl-card-off::after {
-    background: var(--rl-text-dim);
+.rl-card-off:hover {
+    opacity: 0.6;
 }
 
 .rl-card-body {
@@ -318,36 +471,37 @@
 
 .rl-card-name {
     font-weight: 600;
-    font-size: 13px;
-    color: var(--rl-text-primary);
+    font-size: 0.88em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     display: flex;
     align-items: center;
     gap: 6px;
+    color: var(--rl-text);
+    letter-spacing: 0.01em;
 }
 
 .rl-token-count {
     font-weight: 400;
-    font-size: 10.5px;
-    color: var(--rl-text-dim);
+    font-size: 0.78em;
+    color: var(--rl-accent);
     flex-shrink: 0;
-    background: var(--rl-purple-subtle);
-    padding: 1px 6px;
-    border-radius: 10px;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
 }
 
 .rl-card-meta {
-    font-size: 11px;
-    color: var(--rl-text-secondary);
+    font-size: 0.76em;
+    color: var(--rl-text-dim);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-top: 2px;
+    letter-spacing: 0.01em;
 }
 
-/* ===== Кнопки управления карточкой ===== */
+/* ─── Кнопки управления карточкой ─── */
 
 .rl-card-controls {
     display: flex;
@@ -356,80 +510,233 @@
     flex-shrink: 0;
 }
 
-.rl-card-controls .menu_button {
-    font-size: 13px;
-    padding: 4px 6px;
-    opacity: 0.5;
-    transition: opacity var(--rl-transition-fast), color var(--rl-transition-fast);
+.rl-card-controls .checkbox_label {
+    padding: 2px 4px;
     border: none;
-    background: transparent;
+    background: none;
+}
+
+.rl-card-controls .checkbox_label:hover {
+    background: none;
+    border-color: transparent;
+}
+
+.rl-card-controls .menu_button {
+    font-size: 0.88em;
+    padding: 4px 6px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: all var(--rl-transition);
+    border-radius: 4px;
 }
 
 .rl-card-controls .menu_button:hover {
     opacity: 1;
-    background: transparent;
-    box-shadow: none;
+    background: var(--rl-surface-hover);
 }
 
 .rl-card-controls .fa-trash-can:hover {
-    color: var(--rl-danger);
+    color: var(--rl-danger) !important;
+    background: var(--rl-danger-dim);
 }
 
 .rl-card-controls .fa-pen-to-square:hover {
-    color: var(--rl-purple-light);
+    color: var(--rl-accent) !important;
+    background: var(--rl-accent-dim);
 }
 
-/* ===== Редактор карточки ===== */
+/* ─── Редактор карточки ─── */
 
 .rl-editor {
-    padding: 10px 0 6px;
+    padding: 4px 0;
+    animation: rl-slidein 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes rl-slidein {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .rl-editor b {
     display: block;
-    margin-bottom: 10px;
-    font-size: 14px;
-    color: var(--rl-purple-light);
+    margin-bottom: 8px;
+    font-size: 0.94em;
+    letter-spacing: 0.02em;
+    color: var(--rl-text);
 }
 
-.rl-editor label {
-    color: var(--rl-text-secondary);
-    font-size: 12.5px;
+.rl-editor .rl-row > label:not(.checkbox_label) {
+    font-size: 0.84em;
+    color: var(--rl-text-dim);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-weight: 600;
 }
+
+/* Textarea описания локации */
+
+#rl-edit-content {
+    min-height: 160px;
+    max-height: 450px;
+}
+
+/* ─── Кнопки редактора ─── */
 
 .rl-editor-buttons {
     display: flex;
     gap: 6px;
-    margin-top: 10px;
+    margin-top: 8px;
     justify-content: flex-start;
 }
 
-/* ===== Скроллбар ===== */
+.rl-editor-buttons .menu_button_icon {
+    padding: 8px 14px;
+    font-size: 0.86em;
+    font-weight: 500;
+    text-align: center;
+    border-radius: var(--rl-radius-sm);
+    cursor: pointer;
+    transition: all var(--rl-transition);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
 
-.rl-cards-list::-webkit-scrollbar {
+/* Кнопка "Сохранить" */
+
+#rl-save-card {
+    background: linear-gradient(135deg, var(--rl-success), #4a9e68);
+    color: #fff !important;
+    border: none;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(93, 186, 125, 0.25);
+}
+
+#rl-save-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.12),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+#rl-save-card:hover::before {
+    left: 100%;
+}
+
+#rl-save-card:hover {
+    box-shadow: 0 4px 14px rgba(93, 186, 125, 0.35);
+    transform: translateY(-1px);
+}
+
+#rl-save-card:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 1px 4px rgba(93, 186, 125, 0.2);
+}
+
+/* Кнопка "Отмена" */
+
+#rl-cancel-edit {
+    border: 1px solid var(--rl-border);
+    background: var(--rl-surface);
+    color: var(--rl-text);
+}
+
+#rl-cancel-edit:hover {
+    background: var(--rl-surface-hover);
+    border-color: var(--rl-border-accent);
+}
+
+/* ─── Кнопки Импорт / Экспорт / Тест ─── */
+
+#rl-root .rl-section:last-child .rl-row .menu_button_icon {
+    padding: 8px 14px;
+    font-size: 0.84em;
+    font-weight: 500;
+    border-radius: var(--rl-radius-sm);
+    cursor: pointer;
+    transition: all var(--rl-transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid var(--rl-border);
+    background: var(--rl-surface);
+    color: var(--rl-text);
+}
+
+#rl-root .rl-section:last-child .rl-row .menu_button_icon:hover {
+    background: var(--rl-surface-hover);
+    border-color: var(--rl-border-accent);
+}
+
+/* Кнопка "Тест" — акцентная */
+
+#rl-test-triggers {
+    border-color: rgba(155, 125, 212, 0.2) !important;
+    background: rgba(155, 125, 212, 0.08) !important;
+}
+
+#rl-test-triggers:hover {
+    background: var(--rl-accent-dim) !important;
+    border-color: var(--rl-accent) !important;
+    box-shadow: 0 0 10px var(--rl-accent-glow);
+}
+
+/* Экспорт */
+
+#rl-export:hover {
+    border-color: rgba(93, 186, 125, 0.4) !important;
+    background: var(--rl-success-dim) !important;
+    box-shadow: 0 0 8px rgba(93, 186, 125, 0.2);
+}
+
+/* Импорт */
+
+#rl-import:hover {
+    border-color: var(--rl-border-accent) !important;
+    box-shadow: 0 0 8px var(--rl-accent-glow);
+}
+
+/* ─── Скроллбар textarea ─── */
+
+#rl-root textarea::-webkit-scrollbar {
     width: 5px;
 }
 
-.rl-cards-list::-webkit-scrollbar-track {
+#rl-root textarea::-webkit-scrollbar-track {
     background: transparent;
-}
-
-.rl-cards-list::-webkit-scrollbar-thumb {
-    background: var(--rl-purple-border);
     border-radius: 3px;
 }
 
-.rl-cards-list::-webkit-scrollbar-thumb:hover {
-    background: var(--rl-purple-bright);
+#rl-root textarea::-webkit-scrollbar-thumb {
+    background: var(--rl-accent-dim);
+    border-radius: 3px;
+    transition: background 0.2s;
 }
 
-/* ===== Импорт/Экспорт секция ===== */
-
-#rl-root .rl-section:last-child .rl-row .menu_button i {
-    margin-right: 2px;
+#rl-root textarea::-webkit-scrollbar-thumb:hover {
+    background: var(--rl-accent-glow);
 }
 
-/* ===== Адаптив ===== */
+/* ─── Адаптивность ─── */
 
 @media (max-width: 400px) {
     .rl-card {
@@ -445,5 +752,32 @@
     .rl-cards-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .rl-header-buttons {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .rl-editor-buttons {
+        flex-direction: column;
+    }
+
+    .rl-editor-buttons .menu_button_icon {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #rl-root .inline-drawer-content {
+        padding: 10px 10px 14px;
+    }
+
+    #rl-root .rl-section:last-child .rl-row {
+        flex-direction: column;
+    }
+
+    #rl-root .rl-section:last-child .rl-row .menu_button_icon {
+        width: 100%;
+        justify-content: center;
     }
 }
