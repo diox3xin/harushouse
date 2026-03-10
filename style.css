@@ -1,0 +1,250 @@
+/*
+ * ============================================================
+ *  Residence Loader — стили
+ * ============================================================
+ *  Визуальное оформление панели расширения.
+ *  Вписывается в общий стиль SillyTavern, не ломает ничего.
+ * ============================================================
+ */
+
+/* ===== Контейнер ===== */
+
+.rl-container {
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+/* ===== Секции ===== */
+
+.rl-section {
+    margin-bottom: 8px;
+}
+
+.rl-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 5px 0;
+}
+
+.rl-row > span {
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+.rl-hint {
+    display: block;
+    width: 100%;
+    color: var(--SmartThemeQuoteColor, #888);
+    font-size: 11px;
+    font-style: italic;
+    margin-top: 2px;
+    line-height: 1.35;
+}
+
+/* ===== Бейдж активных карточек ===== */
+
+.rl-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    margin-left: 8px;
+    border-radius: 10px;
+    background: var(--SmartThemeBotMesBlurTintColor, #5b8c5a);
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+/* ===== Заголовок карточек + кнопки ===== */
+
+.rl-cards-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.rl-header-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+/* ===== Список карточек ===== */
+
+.rl-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.rl-empty {
+    text-align: center;
+    color: var(--SmartThemeQuoteColor, #888);
+    font-style: italic;
+    padding: 12px 0;
+    font-size: 13px;
+}
+
+/* ===== Отдельная карточка ===== */
+
+.rl-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--SmartThemeBlurTintColor, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255, 255, 255, 0.1));
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.rl-card:hover {
+    background: var(--SmartThemeEmColor, rgba(255, 255, 255, 0.08));
+}
+
+.rl-card-off {
+    opacity: 0.45;
+}
+
+.rl-card-body {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.rl-card-name {
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rl-token-count {
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--SmartThemeQuoteColor, #888);
+    flex-shrink: 0;
+}
+
+.rl-card-meta {
+    font-size: 11px;
+    color: var(--SmartThemeQuoteColor, #999);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+}
+
+/* ===== Кнопки управления карточкой ===== */
+
+.rl-card-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.rl-card-controls .menu_button {
+    font-size: 14px;
+    padding: 3px 5px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.rl-card-controls .menu_button:hover {
+    opacity: 1;
+}
+
+.rl-card-controls .fa-trash-can:hover {
+    color: #e74c3c;
+}
+
+.rl-card-controls .fa-pen-to-square:hover {
+    color: var(--SmartThemeBotMesBlurTintColor, #5dade2);
+}
+
+/* ===== Редактор карточки ===== */
+
+.rl-editor {
+    padding: 8px 0 4px;
+}
+
+.rl-editor b {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.rl-editor .text_pole {
+    font-size: 13px;
+}
+
+.rl-editor textarea.text_pole {
+    resize: vertical;
+    min-height: 120px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.rl-editor-buttons {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    justify-content: flex-start;
+}
+
+/* ===== Скроллбар для списка карточек ===== */
+
+.rl-cards-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.rl-cards-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.rl-cards-list::-webkit-scrollbar-thumb {
+    background: var(--SmartThemeBorderColor, rgba(255, 255, 255, 0.15));
+    border-radius: 3px;
+}
+
+.rl-cards-list::-webkit-scrollbar-thumb:hover {
+    background: var(--SmartThemeQuoteColor, rgba(255, 255, 255, 0.3));
+}
+
+/* ===== Адаптив для узких панелей ===== */
+
+@media (max-width: 400px) {
+    .rl-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .rl-card-controls {
+        align-self: flex-end;
+        margin-top: 4px;
+    }
+
+    .rl-cards-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
