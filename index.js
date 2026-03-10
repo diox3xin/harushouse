@@ -12,33 +12,54 @@
  * ============================================================
  */
 
-import {
-    extension_settings,
-    getContext,
-    setExtensionPrompt,
-    extension_prompt_types,
-    extension_prompt_roles,
-} from "../../../extensions.js";
+// ============================================
+//  ИМПОРТЫ (безопасные)
+// ============================================
 
-import {
-    eventSource,
-    event_types,
-    saveSettingsDebounced,
-} from "../../../../script.js";
+let extension_settings, getContext, setExtensionPrompt;
+let extension_prompt_types, extension_prompt_roles;
+let eventSource, event_types, saveSettingsDebounced;
+
+try {
+    const extModule = await import("../../../extensions.js");
+    extension_settings = extModule.extension_settings;
+    getContext = extModule.getContext;
+    setExtensionPrompt = extModule.setExtensionPrompt;
+    extension_prompt_types = extModule.extension_prompt_types;
+    extension_prompt_roles = extModule.extension_prompt_roles;
+} catch (err) {
+    console.error("[residence-loader] Ошибка импорта extensions.js:", err);
+}
+
+try {
+    const scriptModule = await import("../../../../script.js");
+    eventSource = scriptModule.eventSource;
+    event_types = scriptModule.event_types;
+    saveSettingsDebounced = scriptModule.saveSettingsDebounced;
+} catch (err) {
+    console.error("[residence-loader] Ошибка импорта script.js:", err);
+}
 
 // ============================================
 //  КОНСТАНТЫ
 // ============================================
 
 const EXTENSION_NAME = "residence-loader";
+const LOG_PREFIX = `[${EXTENSION_NAME}]`;
+
+// Числовые fallback-значения на случай если enum-ы не загрузились
+const PROMPT_TYPE_IN_PROMPT = extension_prompt_types?.IN_PROMPT ?? 0;
+const PROMPT_TYPE_IN_CHAT = extension_prompt_types?.IN_CHAT ?? 1;
+const PROMPT_TYPE_BEFORE_PROMPT = extension_prompt_types?.BEFORE_PROMPT ?? 2;
+const PROMPT_ROLE_SYSTEM = extension_prompt_roles?.SYSTEM ?? 0;
 
 // Дефолтные настройки расширения
 const DEFAULT_SETTINGS = {
     enabled: true,
     globalScanDepth: 4,
-    injectionPosition: extension_prompt_types.IN_CHAT,
+    injectionPosition: PROMPT_TYPE_IN_CHAT,
     injectionDepth: 1,
-    injectionRole: extension_prompt_roles.SYSTEM,
+    injectionRole: PROMPT_ROLE_SYSTEM,
     wrapperTemplate: "[Активные данные локаций — используй эти детали при описании текущей сцены. Не выдумывай мебель, запахи и предметы, которых здесь нет:]",
     cards: [],
     debug: false,
@@ -46,27 +67,19 @@ const DEFAULT_SETTINGS = {
 
 // Позиции инжекции для UI селекта
 const POSITION_OPTIONS = [
-    { value: extension_prompt_types.IN_PROMPT, label: "В промпте (после system)" },
-    { value: extension_prompt_types.IN_CHAT, label: "В чате (на заданной глубине)" },
-    { value: extension_prompt_types.BEFORE_PROMPT, label: "Перед промптом" },
+    { value: PROMPT_TYPE_IN_PROMPT, label: "В промпте (после system)" },
+    { value: PROMPT_TYPE_IN_CHAT, label: "В чате (на заданной глубине)" },
+    { value: PROMPT_TYPE_BEFORE_PROMPT, label: "Перед промптом" },
 ];
 
 // ============================================
 //  УТИЛИТЫ
 // ============================================
 
-/**
- * Генерирует уникальный ID для карточки
- */
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2, 11);
 }
 
-/**
- * Нормализация текста для поиска триггеров.
- * Приводим к нижнему регистру, убираем пунктуацию,
- * схлопываем пробелы.
- */
 function normalizeText(text) {
     if (!text) return "";
     return text
@@ -76,52 +89,41 @@ function normalizeText(text) {
         .trim();
 }
 
-/**
- * Экранирование спецсимволов для RegExp
- */
-function escapeRegex(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * Экранирование HTML для безопасного вывода
- */
 function escapeHtml(text) {
+    if (!text) return "";
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
 }
 
-/**
- * Извлекает текст последних N сообщений из чата.
- * Возвращает склеенную строку.
- */
 function getRecentMessagesText(depth) {
-    const context = getContext();
-    if (!context.chat || context.chat.length === 0) return "";
-
-    const slice = context.chat.slice(-depth);
-    return slice.map(msg => msg.mes || "").join(" ");
+    try {
+        const context = getContext();
+        if (!context || !context.chat || context.chat.length === 0) return "";
+        const slice = context.chat.slice(-depth);
+        return slice.map(msg => msg.mes || "").join(" ");
+    } catch (err) {
+        console.warn(LOG_PREFIX, "Ошибка чтения чата:", err);
+        return "";
+    }
 }
 
-/**
- * Логирование в debug режиме
- */
 function debugLog(...args) {
     if (getSettings().debug) {
-        console.log(`[${EXTENSION_NAME}]`, ...args);
+        console.log(LOG_PREFIX, ...args);
     }
 }
 
 // ============================================
-//  НАСТРОЙКИ: ЗАГРУЗКА И СОХРАНЕНИЕ
+//  НАСТРОЙКИ
 // ============================================
 
-/**
- * Загружает настройки расширения.
- * Если каких-то полей нет — подставляет дефолтные значения.
- */
 function loadSettings() {
+    if (!extension_settings) {
+        console.error(LOG_PREFIX, "extension_settings не загружен!");
+        return;
+    }
+
     if (!extension_settings[EXTENSION_NAME]) {
         extension_settings[EXTENSION_NAME] = {};
     }
@@ -135,59 +137,41 @@ function loadSettings() {
                 : defaultValue;
         }
     }
+
+    console.log(LOG_PREFIX, "Настройки загружены:", JSON.stringify(settings).substring(0, 200));
 }
 
-/**
- * Сохраняет настройки (с debounce, чтобы не спамить диск)
- */
 function saveSettings() {
-    saveSettingsDebounced();
+    if (saveSettingsDebounced) {
+        saveSettingsDebounced();
+    } else {
+        console.warn(LOG_PREFIX, "saveSettingsDebounced недоступен");
+    }
 }
 
-/**
- * Получить текущие настройки
- */
 function getSettings() {
+    if (!extension_settings || !extension_settings[EXTENSION_NAME]) {
+        return { ...DEFAULT_SETTINGS };
+    }
     return extension_settings[EXTENSION_NAME];
 }
 
 // ============================================
-//  ЛОГИКА СКАНИРОВАНИЯ ТРИГГЕРОВ
+//  ЛОГИКА ТРИГГЕРОВ
 // ============================================
 
-/**
- * Проверяет, содержится ли триггер в тексте.
- *
- * Если триггер — фраза из нескольких слов, ищем подстроку.
- * Если одиночное слово — ищем по границам слова (чтобы "кухня"
- * не срабатывало на "кухнях" — хотя, на самом деле, для русского
- * языка лучше искать начало слова, т.к. склонения).
- *
- * Используем "мягкий" поиск: проверяем, начинается ли какое-либо
- * слово в тексте с триггера (prefix match), чтобы учесть
- * морфологию русского языка.
- */
 function triggerMatchesText(trigger, text) {
     const normalizedTrigger = normalizeText(trigger);
     if (!normalizedTrigger) return false;
 
-    // Фраза из нескольких слов — ищем как подстроку
     if (normalizedTrigger.includes(" ")) {
         return text.includes(normalizedTrigger);
     }
 
-    // Одиночное слово — prefix match для учёта склонений/спряжений
-    // "кухн" совпадёт с "кухня", "кухне", "кухню", "кухни"
-    // "холодильник" совпадёт с "холодильника", "холодильнике"
     const words = text.split(" ");
     return words.some(word => word.startsWith(normalizedTrigger));
 }
 
-/**
- * Главная функция сканирования.
- * Проходит по всем включённым карточкам, проверяет триггеры
- * в последних N сообщениях. Возвращает массив активированных карточек.
- */
 function scanTriggers() {
     const settings = getSettings();
 
@@ -195,8 +179,6 @@ function scanTriggers() {
     if (!settings.cards || settings.cards.length === 0) return [];
 
     const globalDepth = settings.globalScanDepth || 4;
-
-    // Кэш текстов по глубине, чтобы не пересканировать
     const textCache = {};
 
     function getTextForDepth(depth) {
@@ -211,7 +193,6 @@ function scanTriggers() {
     for (const card of settings.cards) {
         if (!card.enabled) continue;
 
-        // "Всегда активна" — мастер-карточка (общая планировка)
         if (card.alwaysActive) {
             activated.push(card);
             continue;
@@ -219,7 +200,6 @@ function scanTriggers() {
 
         if (!card.triggers || card.triggers.length === 0) continue;
 
-        // Определяем глубину: своя или глобальная
         const depth = (card.scanDepth && card.scanDepth > 0)
             ? card.scanDepth
             : globalDepth;
@@ -227,7 +207,6 @@ function scanTriggers() {
         const text = getTextForDepth(depth);
         if (!text) continue;
 
-        // Проверяем каждый триггер — достаточно одного совпадения
         const isTriggered = card.triggers.some(trigger =>
             triggerMatchesText(trigger, text)
         );
@@ -244,10 +223,25 @@ function scanTriggers() {
 //  ИНЖЕКЦИЯ В ПРОМПТ
 // ============================================
 
-/**
- * Сканирует триггеры и инжектит активированные карточки в промпт.
- * Вызывается перед каждой генерацией.
- */
+function safeSetExtensionPrompt(key, value, position, depth, scan, role) {
+    try {
+        if (typeof setExtensionPrompt === "function") {
+            setExtensionPrompt(key, value, position, depth, scan, role);
+            return;
+        }
+
+        const ctx = getContext();
+        if (ctx && typeof ctx.setExtensionPrompt === "function") {
+            ctx.setExtensionPrompt(key, value, position, depth, scan, role);
+            return;
+        }
+
+        console.warn(LOG_PREFIX, "setExtensionPrompt не найден ни в экспортах, ни в контексте");
+    } catch (err) {
+        console.error(LOG_PREFIX, "Ошибка при setExtensionPrompt:", err);
+    }
+}
+
 function injectActivatedCards() {
     const settings = getSettings();
 
@@ -264,7 +258,6 @@ function injectActivatedCards() {
         return;
     }
 
-    // Собираем контент
     const wrapper = settings.wrapperTemplate || DEFAULT_SETTINGS.wrapperTemplate;
     const cardBlocks = activatedCards.map(card => {
         return `### ${card.name}\n${card.content}`;
@@ -272,48 +265,39 @@ function injectActivatedCards() {
 
     const fullPrompt = `${wrapper}\n\n${cardBlocks.join("\n\n")}`;
 
-    // Инжектим
-    setExtensionPrompt(
+    safeSetExtensionPrompt(
         EXTENSION_NAME,
         fullPrompt,
-        settings.injectionPosition ?? extension_prompt_types.IN_CHAT,
+        settings.injectionPosition ?? PROMPT_TYPE_IN_CHAT,
         settings.injectionDepth ?? 1,
         false,
-        settings.injectionRole ?? extension_prompt_roles.SYSTEM,
+        settings.injectionRole ?? PROMPT_ROLE_SYSTEM,
     );
 
     debugLog(`Активировано карточек: ${activatedCards.length}`);
     activatedCards.forEach(c => debugLog(`  ✓ ${c.name}`));
 
-    // Обновляем индикатор в UI
     updateActiveIndicator(activatedCards);
 }
 
-/**
- * Очищает инжекцию (пустой промпт)
- */
 function clearInjection() {
-    setExtensionPrompt(
+    safeSetExtensionPrompt(
         EXTENSION_NAME,
         "",
-        extension_prompt_types.IN_CHAT,
+        PROMPT_TYPE_IN_CHAT,
         1,
         false,
-        extension_prompt_roles.SYSTEM,
+        PROMPT_ROLE_SYSTEM,
     );
 
     updateActiveIndicator([]);
 }
 
 // ============================================
-//  UI: РЕНДЕРИНГ
+//  UI: ПОСТРОЕНИЕ HTML
 // ============================================
 
-/**
- * Создаёт и вставляет главную панель расширения
- * в секцию настроек расширений SillyTavern.
- */
-function renderExtensionUI() {
+function buildSettingsHtml() {
     const settings = getSettings();
 
     const positionOptionsHtml = POSITION_OPTIONS.map(opt => {
@@ -321,17 +305,16 @@ function renderExtensionUI() {
         return `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
     }).join("");
 
-    const html = `
+    return `
     <div id="rl-root" class="rl-container">
         <div class="inline-drawer">
-            <div class="inline-drawer-toggle inline-drawer-header">
+            <div class="inline-drawer-toggle inline-drawer-header" id="rl-drawer-toggle">
                 <b>🏠 Residence Loader</b>
                 <span id="rl-active-badge" class="rl-badge" style="display:none;" title="Активных карточек">0</span>
                 <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
             </div>
-            <div class="inline-drawer-content">
+            <div class="inline-drawer-content" id="rl-drawer-content">
 
-                <!-- ===== Глобальные настройки ===== -->
                 <div class="rl-section">
                     <div class="rl-row">
                         <label class="checkbox_label">
@@ -372,7 +355,6 @@ function renderExtensionUI() {
 
                 <hr>
 
-                <!-- ===== Карточки ===== -->
                 <div class="rl-section">
                     <div class="rl-cards-header">
                         <b>📋 Карточки локаций</b>
@@ -390,12 +372,9 @@ function renderExtensionUI() {
                         </div>
                     </div>
 
-                    <div id="rl-cards-list" class="rl-cards-list">
-                        <!-- Динамический рендер -->
-                    </div>
+                    <div id="rl-cards-list" class="rl-cards-list"></div>
                 </div>
 
-                <!-- ===== Редактор карточки ===== -->
                 <div id="rl-editor" class="rl-editor" style="display:none;">
                     <hr>
                     <b id="rl-editor-title">Новая карточка</b>
@@ -454,7 +433,6 @@ function renderExtensionUI() {
                     </div>
                 </div>
 
-                <!-- ===== Импорт / Экспорт ===== -->
                 <hr>
                 <div class="rl-section">
                     <div class="rl-row" style="gap:6px;">
@@ -473,11 +451,69 @@ function renderExtensionUI() {
             </div>
         </div>
     </div>`;
+}
 
-    $("#extensions_settings2").append(html);
+// ============================================
+//  UI: РЕНДЕРИНГ
+// ============================================
+
+function renderExtensionUI() {
+    const html = buildSettingsHtml();
+
+    // Пробуем несколько контейнеров в порядке приоритета
+    const containers = [
+        "#extensions_settings",
+        "#extensions_settings2",
+        "#extensions_settings_area",
+    ];
+
+    let appended = false;
+
+    for (const selector of containers) {
+        const $container = $(selector);
+        if ($container.length > 0) {
+            $container.append(html);
+            console.log(LOG_PREFIX, `UI добавлен в ${selector}`);
+            appended = true;
+            break;
+        }
+    }
+
+    if (!appended) {
+        console.error(LOG_PREFIX, "Не найден контейнер для UI! Пробовал:", containers.join(", "));
+        console.log(LOG_PREFIX, "Доступные #extensions_ элементы:",
+            $("[id^='extensions_']").map(function() { return this.id; }).get()
+        );
+        return;
+    }
+
+    // Проверяем что наш элемент реально в DOM
+    if ($("#rl-root").length === 0) {
+        console.error(LOG_PREFIX, "HTML добавлен, но #rl-root не найден в DOM!");
+        return;
+    }
+
+    console.log(LOG_PREFIX, "UI элемент #rl-root найден в DOM ✓");
+
+    // Ручная привязка inline-drawer toggle
+    // (на случай если ST не перехватывает динамически добавленные drawer-ы)
+    $("#rl-drawer-toggle").on("click", function () {
+        const $content = $("#rl-drawer-content");
+        const $icon = $(this).find(".inline-drawer-icon");
+
+        if ($content.is(":visible")) {
+            $content.slideUp(200);
+            $icon.removeClass("up").addClass("down");
+        } else {
+            $content.slideDown(200);
+            $icon.removeClass("down").addClass("up");
+        }
+    });
 
     renderCardsList();
     bindUIEvents();
+
+    console.log(LOG_PREFIX, "UI полностью инициализирован ✓");
 }
 
 /**
@@ -486,6 +522,12 @@ function renderExtensionUI() {
 function renderCardsList() {
     const settings = getSettings();
     const container = $("#rl-cards-list");
+
+    if (container.length === 0) {
+        console.warn(LOG_PREFIX, "#rl-cards-list не найден");
+        return;
+    }
+
     container.empty();
 
     if (!settings.cards || settings.cards.length === 0) {
@@ -502,7 +544,6 @@ function renderCardsList() {
                 ? "🔑 " + card.triggers.slice(0, 4).join(", ") + (card.triggers.length > 4 ? " ..." : "")
                 : "⚠ нет триггеров";
 
-        // Примерный вес в токенах (грубо: 1 токен ≈ 3.5 символа для русского)
         const approxTokens = card.content
             ? Math.round(card.content.length / 3.5)
             : 0;
@@ -532,11 +573,10 @@ function renderCardsList() {
     }
 }
 
-/**
- * Обновляет бейдж с количеством активных карточек
- */
 function updateActiveIndicator(activatedCards) {
     const badge = $("#rl-active-badge");
+    if (badge.length === 0) return;
+
     if (activatedCards.length > 0) {
         badge.text(activatedCards.length).show();
     } else {
@@ -549,8 +589,7 @@ function updateActiveIndicator(activatedCards) {
 // ============================================
 
 function bindUIEvents() {
-    // ---------- Глобальные настройки (продолжение) ----------
-
+    // Глобальные настройки
     $("#rl-enabled").on("change", function () {
         getSettings().enabled = $(this).is(":checked");
         saveSettings();
@@ -590,8 +629,7 @@ function bindUIEvents() {
         saveSettings();
     });
 
-    // ---------- Карточки: toggle включить/выключить ----------
-
+    // Карточки: toggle
     $(document).on("change", ".rl-toggle", function () {
         const id = $(this).data("id");
         const card = findCardById(id);
@@ -602,8 +640,7 @@ function bindUIEvents() {
         }
     });
 
-    // ---------- Карточки: редактирование ----------
-
+    // Карточки: редактирование
     $(document).on("click", ".rl-btn-edit", function () {
         const id = $(this).data("id");
         const card = findCardById(id);
@@ -612,15 +649,13 @@ function bindUIEvents() {
         }
     });
 
-    // ---------- Карточки: удаление ----------
-
+    // Карточки: удаление
     $(document).on("click", ".rl-btn-delete", function () {
         const id = $(this).data("id");
         const card = findCardById(id);
         if (!card) return;
 
-        const confirmMsg = `Удалить карточку «${card.name || "Без названия"}»?\nЭто действие необратимо.`;
-        if (confirm(confirmMsg)) {
+        if (confirm(`Удалить карточку «${card.name || "Без названия"}»?\nЭто действие необратимо.`)) {
             const settings = getSettings();
             settings.cards = settings.cards.filter(c => c.id !== id);
             saveSettings();
@@ -629,38 +664,32 @@ function bindUIEvents() {
         }
     });
 
-    // ---------- Добавить новую карточку ----------
-
+    // Добавить
     $("#rl-add-card").on("click", function () {
         openEditor(null);
     });
 
-    // ---------- Сохранить карточку из редактора ----------
-
+    // Сохранить из редактора
     $("#rl-save-card").on("click", function () {
         saveCardFromEditor();
     });
 
-    // ---------- Отмена редактирования ----------
-
+    // Отмена
     $("#rl-cancel-edit").on("click", function () {
         closeEditor();
     });
 
-    // ---------- Тест триггеров ----------
-
+    // Тест триггеров
     $("#rl-test-triggers").on("click", function () {
         runTriggerTest();
     });
 
-    // ---------- Экспорт ----------
-
+    // Экспорт
     $("#rl-export").on("click", function () {
         exportCards();
     });
 
-    // ---------- Импорт ----------
-
+    // Импорт
     $("#rl-import").on("click", function () {
         $("#rl-import-file").trigger("click");
     });
@@ -670,7 +699,6 @@ function bindUIEvents() {
         if (file) {
             importCards(file);
         }
-        // Сбрасываем input, чтобы можно было загрузить тот же файл повторно
         $(this).val("");
     });
 }
@@ -679,20 +707,15 @@ function bindUIEvents() {
 //  КАРТОЧКИ: ПОИСК, РЕДАКТОР, СОХРАНЕНИЕ
 // ============================================
 
-/**
- * Находит карточку по ID
- */
 function findCardById(id) {
     const settings = getSettings();
     return settings.cards.find(c => c.id === id) || null;
 }
 
-/**
- * Открывает редактор для существующей карточки или новой
- * @param {object|null} card — если null, создаём новую
- */
 function openEditor(card) {
     const editor = $("#rl-editor");
+    if (editor.length === 0) return;
+
     const isNew = !card;
 
     if (isNew) {
@@ -715,22 +738,16 @@ function openEditor(card) {
 
     editor.slideDown(200);
 
-    // Скроллим к редактору
     setTimeout(() => {
-        editor[0].scrollIntoView({ behavior: "smooth", block: "start" });
+        const el = editor[0];
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 220);
 }
 
-/**
- * Закрывает редактор
- */
 function closeEditor() {
     $("#rl-editor").slideUp(200);
 }
 
-/**
- * Считывает данные из редактора и сохраняет карточку
- */
 function saveCardFromEditor() {
     const settings = getSettings();
     const editId = $("#rl-edit-id").val();
@@ -740,7 +757,6 @@ function saveCardFromEditor() {
     const alwaysActive = $("#rl-edit-always").is(":checked");
     const content = $("#rl-edit-content").val().trim();
 
-    // Валидация
     if (!name) {
         alert("Введи название карточки!");
         $("#rl-edit-name").focus();
@@ -759,14 +775,12 @@ function saveCardFromEditor() {
         return;
     }
 
-    // Парсим триггеры: разбиваем по запятой, трим, убираем пустые
     const triggers = triggersRaw
         .split(",")
         .map(t => t.trim().toLowerCase())
         .filter(t => t.length > 0);
 
     if (editId) {
-        // Редактируем существующую
         const card = findCardById(editId);
         if (card) {
             card.name = name;
@@ -776,8 +790,7 @@ function saveCardFromEditor() {
             card.content = content;
         }
     } else {
-        // Создаём новую
-        const newCard = {
+        settings.cards.push({
             id: generateId(),
             name: name,
             triggers: triggers,
@@ -785,8 +798,7 @@ function saveCardFromEditor() {
             alwaysActive: alwaysActive,
             content: content,
             enabled: true,
-        };
-        settings.cards.push(newCard);
+        });
     }
 
     saveSettings();
@@ -795,13 +807,9 @@ function saveCardFromEditor() {
 }
 
 // ============================================
-//  ТЕСТИРОВАНИЕ ТРИГГЕРОВ
+//  ТЕСТ ТРИГГЕРОВ
 // ============================================
 
-/**
- * Запускает тест триггеров и выводит результат в виде алерта.
- * Показывает какие карточки активны прямо сейчас и почему.
- */
 function runTriggerTest() {
     const settings = getSettings();
 
@@ -865,13 +873,12 @@ function runTriggerTest() {
         }
     }
 
-    // Показываем текст последних сообщений для отладки
     const previewText = getTextForDepth(globalDepth);
     const previewSnippet = previewText
         ? previewText.substring(0, 300) + (previewText.length > 300 ? "..." : "")
         : "(пусто)";
 
-    const output = [
+    alert([
         "🏠 Residence Loader — Тест триггеров",
         "═══════════════════════════════",
         "",
@@ -880,18 +887,13 @@ function runTriggerTest() {
         "═══════════════════════════════",
         `Сканируемый текст (глубина ${globalDepth}, первые 300 символов):`,
         previewSnippet,
-    ].join("\n");
-
-    alert(output);
+    ].join("\n"));
 }
 
 // ============================================
 //  ЭКСПОРТ / ИМПОРТ
 // ============================================
 
-/**
- * Экспортирует все карточки в JSON-файл
- */
 function exportCards() {
     const settings = getSettings();
 
@@ -900,16 +902,14 @@ function exportCards() {
         return;
     }
 
-    const exportData = {
+    const json = JSON.stringify({
         version: 1,
         exportedAt: new Date().toISOString(),
         cards: settings.cards,
-    };
+    }, null, 2);
 
-    const json = JSON.stringify(exportData, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = url;
     a.download = `residence-loader-cards-${Date.now()}.json`;
@@ -919,10 +919,6 @@ function exportCards() {
     URL.revokeObjectURL(url);
 }
 
-/**
- * Импортирует карточки из JSON-файла.
- * Спрашивает: заменить все или добавить к существующим.
- */
 function importCards(file) {
     const reader = new FileReader();
 
@@ -935,10 +931,9 @@ function importCards(file) {
                 return;
             }
 
-            // Валидируем карточки
-            const validCards = data.cards.filter(card => {
-                return card && typeof card.name === "string" && typeof card.content === "string";
-            });
+            const validCards = data.cards.filter(card =>
+                card && typeof card.name === "string" && typeof card.content === "string"
+            );
 
             if (validCards.length === 0) {
                 alert("⚠ В файле нет валидных карточек.");
@@ -947,18 +942,16 @@ function importCards(file) {
 
             const settings = getSettings();
 
-            const action = confirm(
+            const shouldReplace = confirm(
                 `Найдено карточек: ${validCards.length}\n\n` +
                 `OK = ЗАМЕНИТЬ все текущие карточки\n` +
                 `Отмена = ДОБАВИТЬ к существующим`
             );
 
-            if (action) {
-                // Заменить
+            if (shouldReplace) {
                 settings.cards = [];
             }
 
-            // Добавляем карточки с новыми ID (чтобы не было коллизий)
             for (const card of validCards) {
                 settings.cards.push({
                     id: generateId(),
@@ -973,12 +966,11 @@ function importCards(file) {
 
             saveSettings();
             renderCardsList();
-
             alert(`✅ Импортировано карточек: ${validCards.length}`);
 
         } catch (err) {
             alert("⚠ Ошибка при чтении файла:\n" + err.message);
-            console.error(`[${EXTENSION_NAME}] Import error:`, err);
+            console.error(LOG_PREFIX, "Import error:", err);
         }
     };
 
@@ -986,42 +978,70 @@ function importCards(file) {
 }
 
 // ============================================
-//  ИНИЦИАЛИЗАЦИЯ РАСШИРЕНИЯ
+//  ИНИЦИАЛИЗАЦИЯ
 // ============================================
 
-/**
- * Точка входа. Вызывается когда jQuery и SillyTavern готовы.
- */
 jQuery(async () => {
-    // 1. Загружаем настройки
-    loadSettings();
+    try {
+        console.log(LOG_PREFIX, "Начинаю инициализацию...");
 
-    // 2. Рендерим UI
-    renderExtensionUI();
+        // Проверяем критичные зависимости
+        if (!extension_settings) {
+            console.error(LOG_PREFIX, "FATAL: extension_settings не импортирован. Расширение не может работать.");
+            return;
+        }
 
-    // 3. Подписываемся на событие генерации —
-    //    перед каждой отправкой промпта сканируем триггеры
-    //    и инжектим активные карточки.
-    eventSource.on(event_types.GENERATION_STARTED, () => {
-        debugLog("GENERATION_STARTED — сканирую триггеры...");
-        injectActivatedCards();
-    });
+        if (!getContext) {
+            console.error(LOG_PREFIX, "FATAL: getContext не импортирован. Расширение не может работать.");
+            return;
+        }
 
-    // 4. При смене чата — очищаем инжекцию,
-    //    чтобы не тащить данные из прошлого чата.
-    eventSource.on(event_types.CHAT_CHANGED, () => {
-        debugLog("CHAT_CHANGED — очищаю инжекцию");
-        clearInjection();
-        updateActiveIndicator([]);
-    });
+        // 1. Настройки
+        loadSettings();
+        console.log(LOG_PREFIX, "Шаг 1/4: настройки ✓");
 
-    // 5. Опционально: сканируем при загрузке, чтобы бейдж
-    //    сразу показывал актуальное состояние.
-    setTimeout(() => {
-        const activated = scanTriggers();
-        updateActiveIndicator(activated);
-        debugLog("Первичное сканирование завершено, активных:", activated.length);
-    }, 1000);
+        // 2. UI
+        renderExtensionUI();
+        console.log(LOG_PREFIX, "Шаг 2/4: UI ✓");
 
-    console.log(`[${EXTENSION_NAME}] ✅ Расширение загружено и готово к работе!`);
+        // 3. События
+        if (eventSource && event_types) {
+            if (event_types.GENERATION_STARTED) {
+                eventSource.on(event_types.GENERATION_STARTED, () => {
+                    debugLog("GENERATION_STARTED — сканирую триггеры...");
+                    injectActivatedCards();
+                });
+                console.log(LOG_PREFIX, "Шаг 3/4: подписка на GENERATION_STARTED ✓");
+            } else {
+                console.warn(LOG_PREFIX, "event_types.GENERATION_STARTED не определён");
+            }
+
+            if (event_types.CHAT_CHANGED) {
+                eventSource.on(event_types.CHAT_CHANGED, () => {
+                    debugLog("CHAT_CHANGED — очищаю инжекцию");
+                    clearInjection();
+                    updateActiveIndicator([]);
+                });
+                console.log(LOG_PREFIX, "Шаг 3/4: подписка на CHAT_CHANGED ✓");
+            }
+        } else {
+            console.warn(LOG_PREFIX, "eventSource или event_types недоступны — подписка на события невозможна");
+        }
+
+        // 4. Первичное сканирование
+        setTimeout(() => {
+            try {
+                const activated = scanTriggers();
+                updateActiveIndicator(activated);
+                debugLog("Первичное сканирование: активных", activated.length);
+            } catch (err) {
+                console.warn(LOG_PREFIX, "Ошибка первичного сканирования:", err);
+            }
+        }, 1500);
+
+        console.log(LOG_PREFIX, "✅ Расширение полностью инициализировано!");
+
+    } catch (err) {
+        console.error(LOG_PREFIX, "FATAL: Ошибка при инициализации:", err);
+    }
 });
