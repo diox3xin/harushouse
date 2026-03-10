@@ -1,11 +1,36 @@
 /*
  * ============================================================
- *  Residence Loader — стили
+ *  Residence Loader — стили (Purple Edition)
  * ============================================================
- *  Визуальное оформление панели расширения.
- *  Вписывается в общий стиль SillyTavern, не ломает ничего.
+ *  Фиолетовая цветовая схема с плавными градиентами,
+ *  свечением и мягкими тенями.
  * ============================================================
  */
+
+/* ===== CSS-переменные расширения ===== */
+
+#rl-root {
+    --rl-purple-deep: #2d1b4e;
+    --rl-purple-mid: #4a2d7a;
+    --rl-purple-bright: #7c4dff;
+    --rl-purple-light: #b388ff;
+    --rl-purple-glow: rgba(124, 77, 255, 0.25);
+    --rl-purple-subtle: rgba(179, 136, 255, 0.08);
+    --rl-purple-border: rgba(124, 77, 255, 0.3);
+    --rl-purple-border-hover: rgba(124, 77, 255, 0.55);
+    --rl-text-primary: #e8e0f0;
+    --rl-text-secondary: #a893c2;
+    --rl-text-dim: #7b6a94;
+    --rl-danger: #ff5c8a;
+    --rl-success: #69f0ae;
+    --rl-card-bg: rgba(45, 27, 78, 0.45);
+    --rl-card-bg-hover: rgba(74, 45, 122, 0.5);
+    --rl-input-bg: rgba(20, 12, 35, 0.6);
+    --rl-transition-fast: 0.15s ease;
+    --rl-transition-med: 0.25s ease;
+    --rl-radius: 8px;
+    --rl-radius-sm: 5px;
+}
 
 /* ===== Контейнер ===== */
 
@@ -14,33 +39,141 @@
     line-height: 1.45;
 }
 
-/* ===== Секции ===== */
+/* ===== Drawer header ===== */
+
+#rl-root .inline-drawer-header {
+    background: linear-gradient(135deg, var(--rl-purple-deep) 0%, var(--rl-purple-mid) 100%);
+    border: 1px solid var(--rl-purple-border);
+    border-radius: var(--rl-radius);
+    padding: 10px 14px;
+    transition: border-color var(--rl-transition-med), box-shadow var(--rl-transition-med);
+    position: relative;
+    overflow: hidden;
+}
+
+#rl-root .inline-drawer-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(179, 136, 255, 0.07), transparent);
+    transition: left 0.6s ease;
+    pointer-events: none;
+}
+
+#rl-root .inline-drawer-header:hover::before {
+    left: 100%;
+}
+
+#rl-root .inline-drawer-header:hover {
+    border-color: var(--rl-purple-border-hover);
+    box-shadow: 0 0 12px var(--rl-purple-glow);
+}
+
+#rl-root .inline-drawer-header b {
+    color: var(--rl-purple-light);
+    font-size: 14.5px;
+    letter-spacing: 0.3px;
+}
+
+#rl-root .inline-drawer-icon {
+    color: var(--rl-purple-light);
+    transition: transform 0.3s ease, color var(--rl-transition-fast);
+}
+
+#rl-root .inline-drawer-icon.up {
+    transform: rotate(180deg);
+}
+
+/* ===== Drawer content ===== */
+
+#rl-root .inline-drawer-content {
+    border: 1px solid var(--rl-purple-border);
+    border-top: none;
+    border-radius: 0 0 var(--rl-radius) var(--rl-radius);
+    background: linear-gradient(180deg, rgba(30, 18, 52, 0.85) 0%, rgba(20, 12, 35, 0.9) 100%);
+    padding: 12px 14px;
+    backdrop-filter: blur(8px);
+}
+
+/* ===== Секции и разделители ===== */
 
 .rl-section {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
+
+#rl-root hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rl-purple-border), transparent);
+    margin: 10px 0;
+}
+
+/* ===== Строки настроек ===== */
 
 .rl-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px;
-    margin: 5px 0;
+    margin: 6px 0;
 }
 
 .rl-row > span {
     white-space: nowrap;
     font-size: 13px;
+    color: var(--rl-text-secondary);
 }
 
 .rl-hint {
     display: block;
     width: 100%;
-    color: var(--SmartThemeQuoteColor, #888);
+    color: var(--rl-text-dim);
     font-size: 11px;
     font-style: italic;
     margin-top: 2px;
     line-height: 1.35;
+}
+
+/* ===== Инпуты и textarea ===== */
+
+#rl-root .text_pole,
+#rl-root select.text_pole {
+    background: var(--rl-input-bg);
+    border: 1px solid var(--rl-purple-border);
+    border-radius: var(--rl-radius-sm);
+    color: var(--rl-text-primary);
+    transition: border-color var(--rl-transition-fast), box-shadow var(--rl-transition-fast);
+    padding: 4px 8px;
+}
+
+#rl-root .text_pole:focus,
+#rl-root select.text_pole:focus {
+    border-color: var(--rl-purple-bright);
+    box-shadow: 0 0 6px var(--rl-purple-glow);
+    outline: none;
+}
+
+#rl-root textarea.text_pole {
+    resize: vertical;
+    min-height: 120px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+/* ===== Чекбоксы ===== */
+
+#rl-root .checkbox_label {
+    color: var(--rl-text-primary);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+#rl-root .checkbox_label input[type="checkbox"] {
+    accent-color: var(--rl-purple-bright);
 }
 
 /* ===== Бейдж активных карточек ===== */
@@ -49,16 +182,23 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
     margin-left: 8px;
-    border-radius: 10px;
-    background: var(--SmartThemeBotMesBlurTintColor, #5b8c5a);
+    border-radius: 11px;
+    background: linear-gradient(135deg, var(--rl-purple-bright), #aa66ff);
     color: #fff;
     font-size: 11px;
-    font-weight: bold;
+    font-weight: 700;
     vertical-align: middle;
+    box-shadow: 0 0 8px var(--rl-purple-glow);
+    animation: rl-badge-pulse 2s ease-in-out infinite;
+}
+
+@keyframes rl-badge-pulse {
+    0%, 100% { box-shadow: 0 0 6px var(--rl-purple-glow); }
+    50% { box-shadow: 0 0 14px rgba(124, 77, 255, 0.45); }
 }
 
 /* ===== Заголовок карточек + кнопки ===== */
@@ -69,7 +209,12 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+}
+
+.rl-cards-header b {
+    color: var(--rl-purple-light);
+    font-size: 13.5px;
 }
 
 .rl-header-buttons {
@@ -77,45 +222,92 @@
     gap: 4px;
 }
 
+/* ===== Кнопки (menu_button) ===== */
+
+#rl-root .menu_button {
+    background: var(--rl-card-bg);
+    border: 1px solid var(--rl-purple-border);
+    border-radius: var(--rl-radius-sm);
+    color: var(--rl-purple-light);
+    transition: all var(--rl-transition-fast);
+    cursor: pointer;
+}
+
+#rl-root .menu_button:hover {
+    background: var(--rl-card-bg-hover);
+    border-color: var(--rl-purple-border-hover);
+    color: #fff;
+    box-shadow: 0 0 8px var(--rl-purple-glow);
+}
+
+#rl-root .menu_button:active {
+    transform: scale(0.96);
+}
+
 /* ===== Список карточек ===== */
 
 .rl-cards-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    max-height: 400px;
+    gap: 5px;
+    max-height: 420px;
     overflow-y: auto;
-    padding-right: 2px;
+    padding-right: 3px;
 }
 
 .rl-empty {
     text-align: center;
-    color: var(--SmartThemeQuoteColor, #888);
+    color: var(--rl-text-dim);
     font-style: italic;
-    padding: 12px 0;
+    padding: 16px 0;
     font-size: 13px;
 }
 
-/* ===== Отдельная карточка ===== */
+/* ===== Карточка ===== */
 
 .rl-card {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 6px 10px;
-    border-radius: 6px;
-    background: var(--SmartThemeBlurTintColor, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--SmartThemeBorderColor, rgba(255, 255, 255, 0.1));
-    transition: opacity 0.2s ease, background 0.2s ease;
+    padding: 8px 12px;
+    border-radius: var(--rl-radius);
+    background: var(--rl-card-bg);
+    border: 1px solid var(--rl-purple-border);
+    transition: all var(--rl-transition-med);
+    position: relative;
+    overflow: hidden;
+}
+
+.rl-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--rl-purple-bright);
+    border-radius: 3px 0 0 3px;
+    opacity: 0;
+    transition: opacity var(--rl-transition-fast);
 }
 
 .rl-card:hover {
-    background: var(--SmartThemeEmColor, rgba(255, 255, 255, 0.08));
+    background: var(--rl-card-bg-hover);
+    border-color: var(--rl-purple-border-hover);
+    box-shadow: 0 2px 10px rgba(124, 77, 255, 0.12);
+}
+
+.rl-card:hover::after {
+    opacity: 1;
 }
 
 .rl-card-off {
-    opacity: 0.45;
+    opacity: 0.4;
+}
+
+.rl-card-off::after {
+    background: var(--rl-text-dim);
 }
 
 .rl-card-body {
@@ -127,6 +319,7 @@
 .rl-card-name {
     font-weight: 600;
     font-size: 13px;
+    color: var(--rl-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -137,18 +330,21 @@
 
 .rl-token-count {
     font-weight: 400;
-    font-size: 11px;
-    color: var(--SmartThemeQuoteColor, #888);
+    font-size: 10.5px;
+    color: var(--rl-text-dim);
     flex-shrink: 0;
+    background: var(--rl-purple-subtle);
+    padding: 1px 6px;
+    border-radius: 10px;
 }
 
 .rl-card-meta {
     font-size: 11px;
-    color: var(--SmartThemeQuoteColor, #999);
+    color: var(--rl-text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-top: 1px;
+    margin-top: 2px;
 }
 
 /* ===== Кнопки управления карточкой ===== */
@@ -161,57 +357,54 @@
 }
 
 .rl-card-controls .menu_button {
-    font-size: 14px;
-    padding: 3px 5px;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.15s ease;
+    font-size: 13px;
+    padding: 4px 6px;
+    opacity: 0.5;
+    transition: opacity var(--rl-transition-fast), color var(--rl-transition-fast);
+    border: none;
+    background: transparent;
 }
 
 .rl-card-controls .menu_button:hover {
     opacity: 1;
+    background: transparent;
+    box-shadow: none;
 }
 
 .rl-card-controls .fa-trash-can:hover {
-    color: #e74c3c;
+    color: var(--rl-danger);
 }
 
 .rl-card-controls .fa-pen-to-square:hover {
-    color: var(--SmartThemeBotMesBlurTintColor, #5dade2);
+    color: var(--rl-purple-light);
 }
 
 /* ===== Редактор карточки ===== */
 
 .rl-editor {
-    padding: 8px 0 4px;
+    padding: 10px 0 6px;
 }
 
 .rl-editor b {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-size: 14px;
+    color: var(--rl-purple-light);
 }
 
-.rl-editor .text_pole {
-    font-size: 13px;
-}
-
-.rl-editor textarea.text_pole {
-    resize: vertical;
-    min-height: 120px;
-    font-family: "Consolas", "Courier New", monospace;
+.rl-editor label {
+    color: var(--rl-text-secondary);
     font-size: 12.5px;
-    line-height: 1.5;
 }
 
 .rl-editor-buttons {
     display: flex;
     gap: 6px;
-    margin-top: 8px;
+    margin-top: 10px;
     justify-content: flex-start;
 }
 
-/* ===== Скроллбар для списка карточек ===== */
+/* ===== Скроллбар ===== */
 
 .rl-cards-list::-webkit-scrollbar {
     width: 5px;
@@ -222,15 +415,21 @@
 }
 
 .rl-cards-list::-webkit-scrollbar-thumb {
-    background: var(--SmartThemeBorderColor, rgba(255, 255, 255, 0.15));
+    background: var(--rl-purple-border);
     border-radius: 3px;
 }
 
 .rl-cards-list::-webkit-scrollbar-thumb:hover {
-    background: var(--SmartThemeQuoteColor, rgba(255, 255, 255, 0.3));
+    background: var(--rl-purple-bright);
 }
 
-/* ===== Адаптив для узких панелей ===== */
+/* ===== Импорт/Экспорт секция ===== */
+
+#rl-root .rl-section:last-child .rl-row .menu_button i {
+    margin-right: 2px;
+}
+
+/* ===== Адаптив ===== */
 
 @media (max-width: 400px) {
     .rl-card {
