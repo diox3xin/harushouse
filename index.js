@@ -309,7 +309,7 @@ function buildSettingsHtml() {
     <div id="rl-root" class="rl-container">
         <div class="inline-drawer">
             <div class="inline-drawer-toggle inline-drawer-header" id="rl-drawer-toggle">
-                <b>🏠 Residence Loader</b>
+                <b>Bunny's House</b>
                 <span id="rl-active-badge" class="rl-badge" style="display:none;" title="Активных карточек">0</span>
                 <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
             </div>
